@@ -1,0 +1,104 @@
+Redux流程分析与实现：
+https://juejin.im/post/6844903648934248456
+
+https://www.jianshu.com/p/9728e7931cbe
+
+https://blog.csdn.net/IT_10/article/details/100622787?utm_medium=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.edu_weight&depth_1-utm_source=distribute.pc_relevant.none-task-blog-BlogCommendFromMachineLearnPai2-1.edu_weight
+
+Redux是什么呢？一个状态管理工具。那是干嘛用的呢？都知道，React可以进行单页应用的开发，可以对页面 中各个模块进行分割形成组件，而组件之间就避免不了事件的传递或数据的交互，那Redux就是用来对这些组件的状态进行管理的。就好比买家和卖家，快递是交给第三方（Redux）去完成。
+
+结合项目：
+1.   ./src/actions/types.js : 用于定义常量，包含n个actions的type常量名称的模块， 避免reducers和actions的type常量不一致；
+2.  ./src/actions : 用于创建action对象的工厂函数，创建出的action对象用于传递给dispatch();
+3.   ./src/reducers :  管理状态数据的函数，根据旧的state，删除新的state，必须是纯函数；
+4.   ./src/components : 想要获取state的组件
+5.    store.js : redux 最核心的管理对象；根据指定的reducer函数，产生一个store对象，store对象内部管理数据的新状态，状态数据的初始值为reducer的返回值
+
+Redux工作流程：
+当用户触摸界面时，即（components）发生某个事件，想要获取state的时候，调用store.dispatch(action)捕捉具体的action动作：
+
+1.  调用dispatch， 捕捉到具体的action动作，然后Redux的store自动调用此action对应的reducer函数（这一步是dispatch完成的：currentState = currentReducer(currentState, action)  //调用reducer处理），store传递两个参数给reducer，当前state和收到的action函数中的对象（必须包含一个type，其他参数任意）。
+
+2. action去触发reducers，然后对状态做出修改后再放入store容器中。 reducer函数必须是一个纯函数，该函数会返回一个新的state。当调用dispatch发布最新状态的时候，根据dispatch的回调函数中type的类型，触发reducers做出不同的状态改变。例如，点击“+”按钮的时候，dispatch中的回调函数为increment，这个函数在actions.js中定义，然后触发reducers中的函数（这个函数就是需要在store.js中传给createStore()的参数的函数）作出不同的状态改变，store.js 根据指定的reducer函数，生成一个store对象，store对象中存储的状态初始值就是reducer函数中默认返回（case default）的值。
+
+3.  根reducer会把多个子reducer的返回结果合并成最终的应用状态，在这一过程中，可以使用Redux提供的combineReducers方法。使用combineReducers方法时，action会传递给每个子的reducer进行处理，在子reducer处理后会将结果返回给根reducer合并成最终的应用状态。
+
+4.  store调用store.subscribe(listener)监听state的变化，state一旦发生改变就会触发store的更新，即通过subscribe订阅了状态改变的组件就会接受状态改变的事件，最终view会根据store数据的更新刷新界面，即通过getState获取最新的状态后重新渲染页面
+
+
+从执行npm start后渲染页面的角度解释：
+当页面第一次渲染的之前，store.js中的createStore()函数就根据参数reducers创建了store对象，并且reduceers中的默认返回值就是store对象需要管理的状态以及状态初始值。然后页面调用getState()获取到状态，值获取完毕后进行页面渲染。当用户点击按钮的时候，就会将不同的action传递给dispatch，一旦调用dispatch，就会触发reducer中的函数调用，改变状态之后，将新的状态传递给store，store接受到新的状态之后就会去调用subscribe中的回调函数。
+
+
+￼
+Action
+一个用于描述要干什么动作的普通对象。
+{
+  type: 'ADD_TODO', // type字段必须
+  text: '吃饭'
+}
+Reducer
+根据Action动作的不同，对仓库的数据做处理的一个纯函数。
+const todoApp = (state, action) => {
+  switch (action.type) {
+    case 'ADD_TODO':
+      return [
+        ...state,
+        {
+          id: action.id,
+          text: action.text,
+          completed: false
+        }
+      ]
+    default:
+      return state
+  }
+}
+Store;
+仓库，负责存放状态（state），将 actions 与 reducers 联系起来的东西。 它的功能点有：
+* 维持应用的 state；
+* 提供 getState()方法获取 state；
+* 提供 dispatch(action)方法更新 state；
+* 通过 subscribe(listener) 注册监听器;
+* 通过 subscribe(listener) 返回的函数注销监听器。
+
+react-redux：
+redux作为一个通用的状态管理库，它不只针对react，还可以作用于其它的像vue等。直接使用redux的方式导致react组件和redux的耦合度很高而且通过dispatch，getState等函数调用很麻烦，因此react要想完美的应用redux，还需要封装一层，react-redux就是此作用。react-redux库相对简单些，它提供了一个react组件Provider和一个方法connect。
+
+react-redux将所有的组件分成两大类：
+UI 组件负责 UI 的呈现，容器组件负责管理数据和逻辑
+
+UI组件：
+* 	只负责UI的呈现，不带有任何业务逻辑
+*         没有状态
+* 	通过props接受属性（非函数属性）（this.props)
+* 	不使用任何redux的API
+* 	一般保存在components文件夹下
+容器组件
+* 	负责管理数据和业务逻辑，不负责UI的呈现
+*         带有内部的状态
+* 	使用redux的API
+* 	一般保存在containers文件夹下
+react-redux的相关API：
+1.  Provider： 让所有组件都可以使用state数据
+ReactDOM.render(
+    <Provider store={store}>
+        <App />
+    </Provider>,
+    document.getElementById('root')
+);
+2.  connect: 用于包装UI组件来生成容器，是一个高阶函数（接受一个组件，返回一个包装后的新组件）
+export default connect(mapStateToProps, mapDispatchToProps)(App);
+
+
+
+各部分的身份
+我将会把这个过程比拟成图书馆的一个流程来帮助理解。
+* 		Action Creator（具体借书的表达） 想借书的人向图书馆管理员说明要借的书的那句话。
+* 		Store（图书馆管理员） 负责整个图书馆的管理。是Redux的核心
+* 		Reducers（图书馆管理员的小本本） 管理员需要借助Reducer（图书馆管理员的小本本）来记录。
+* 		React Component（借书的人 ） 需要借书的人  
+工作流程
+借书的人（ReactComponent）说了一句话（Action Creator）向图书馆管理员（Store）借一本书，可是图书馆管理员年纪大了啊记不住啊，便掏出了自己的小本本（Reducers）。看了看知道了那本书有没有，在哪，怎么样。这样一来管理员就拿到了这本书，再把这本书交给了借书人。 翻译过来就是：
+组件想要获取State， 用ActionCreator创建了一个请求交给Store,Store借助Reducer确认了该State的状态，Reducer返回给Store一个结果，Store再把这个State转给组件。
+
