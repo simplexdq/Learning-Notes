@@ -1,0 +1,179 @@
+* let / const
+支持块级作用域;所以变量在模块使用完后就会释放，使用同样的标识符也不会覆盖外部作用域的变量，而var是会覆盖外部作用域的。
+Let和constant不能重复声明，可以/不可以修改，支持块级作用域，不能预解释（有暂时性死区TDZ）
+在函数里没有用 let 声明 temp 的时候，temp 是 undefined，讲道理在 let 声明前也应该是 temp，然而 foo 函数却报了错，证明了就算是在未到达 let 声明的地方，但是在用 let 之前已经起到了作用。这是不是说明其实 let 也有提升（这个提升并不是 var 的那种提升，只是有影响），只是在 TDZ 使用的时候报错了，而不是 undefined。
+事实上，当 JS 引擎检视下面的代码块有变量声明时，对于 var 声明的变量，会将声明提升到函数或全局作用域的顶部，而对 let 或 const 的时候会将声明放在暂时性死区内。任何在暂时性死区内访问变量的企图都会导致“运行时”错误（runtime error）。只有执行到变量的声明语句时，该变量才会从暂时性死区内被移除并可以安全使用。
+禁止重复声明：
+let & let; const & const; var &let; 函数&let:
+function bar(foo) {
+    let foo = 1;
+}; 函数&const
+
+Ex
+// 思考题 1
+//switch (x) {
+//  case 0:
+//    let foo;
+//    break;
+//    
+//  case 1:
+//    let foo; // TypeError for redeclaration.
+//    break;
+//}
+解决方式： 在let作用域块外面加{}
+// 思考题 2
+function bar(){
+   var foo = 1;
+   if (true) {
+      let foo = (foo + 2); 
+   }
+}
+bar();
+因为let支持块作用域，所以其实let作用域只到if语句，所以(foo+2)中的foo是未声明的。
+
+在 ES6 的发展阶段，被广泛认可的变量声明方式是：默认情况下应当使用 let 而不是 var 。对于多数 JS 开发者来说， let 的行为方式正是 var 本应有的方式，因此直接用 let 替代 var 更符合逻辑。在这种情况下，你应当对需要受到保护的变量使用 const 。
+在默认情况下使用 const ，而只在你知道变量值需要被更改的情况下才使用 let 。这在代码中能确保基本层次的不可变性，有助于防止某些类型的错误。
+
+* 箭头函数:
+箭头函数与包围它的代码共享同一个this,能帮你很好的解决this的指向问题
+function bar() {
+}
+let bar =()=> {
+}
+function(){
+}
+()=>{
+}
+
+* 解构赋值
+//复杂解构
+let [{a,b},[n1,n2,n3],num,str]=[{a:12,b:4},[2,3,6],787,'abcdes']
+console.log(a,b,n1,n2,n3,num,str)
+//复杂解构
+let [json,arr,num,str]=[{a:12,b:4},[2,3,6],787,'abcdes']
+console.log(json,arr,num,str)
+
+* 默认参数
+function show(a,b=2,c=5) {
+    console.log(a,b,c);
+}
+show(99); // 99 2 5
+
+* 扩展运算符
+//普通函数
+	function show(a,b,c){
+		alert(a);
+		alert(b);
+		alert(c)
+	}
+	show(1,2,3)//打印出来的结果弹出1,再弹出2，再弹出3
+	
+    //数组展开
+    let arr1=[1,2,3]
+    let arr2=[5,6,7]
+    let arr=[...arr1,...arr2];
+    alert(arr)
+
+* 类
+* 字符串
+需要拼接字符串的时候尽量改成使用模板字符串，模板字符串可以使字符串的拼接更加的简洁和直观
+var name = `The weather today is ${sun} ${rain}.`
+startsWith() :
+用于检测字符串是否以指定的子字符串开始。
+如果是以指定的子字符串开头返回 true，否则 false。
+startsWith() 方法对大小写敏感。
+var str = "Hello world, welcome to the Runoob.";
+var n = str.startsWith("Hello");
+endsWith() :
+let str='1.jpg';
+if(str.endsWith('.txt')){
+	alert('文件文本');
+}else if(str.endsWith('.jpg')){
+	alert('JPG图片');
+}else{
+	alert('其它')
+}//JPG图片
+
+
+* 数组
+map:
+map() ：接收一个函数，将原数组中的所有元素用这个函数处理后放入新数组返回。
+例1：有一个字符串数组，我们希望转为int数组
+let arr=['1','2','3'];
+let newArr = arr.map(s=>parseInt(s));
+console.log(newArr);
+例2:
+let array = [1,2,3];
+let result = array.map(item=>item*2);
+console.log(result);
+reduce:
+接收一个函数（必须）和一个初始值（可选），该函数接收两个参数：
+* 第一个参数是上一次reduce处理的结果
+* 第二个参数是数组中要处理的下一个元素
+* reduce() 会从左到右依次把数组中的元素用reduce处理，并把处理的结果作为下次reduce的第一个参数。如果是第一次，会把前两个元素作为计算参数，或者把用户指定的初始值作为起始参数
+
+//例子1,算平均数
+let score=[89,12,34,23,45,55];
+let result = score.reduce(function(tmp,item,index){
+return tmp+item;
+})
+alert(result/score.length)//43(把这几个数求平均数)
+
+//例子2
+let arr=[12,67,67,889,97];
+let result=arr.reduce(function(tmp,item,index){
+	if(index!=this.length-1){//不是最后一次
+		return tmp+item;
+	}else{//最后一次
+		return(tmp+item)
+	}
+})
+alert(result);//1132
+filter：
+filter() 方法创建一个新的数组，新数组中的元素是通过检查指定数组中符合条件的所有元素。
+注意： filter() 不会对空数组进行检测。
+注意： filter() 不会改变原始数组。
+array.filter(function(currentValue,index,arr), thisValue)
+forEach:
+forEach() 方法用于调用数组的每个元素，并将元素传递给回调函数。
+注意: forEach() 对于空数组是不会执行回调函数的。
+array.forEach(function(currentValue, index, arr), thisValue)
+let arr=[12,3,45,6,566];
+arr.forEach((item,index)=>{
+	alert(index+':'+item)//0:12  1:3  2:45  3:6  4:566
+})
+
+* Promise
+Promise 是一个对象，它代表了一个异步操作的最终完成或者失败。因为大多数人仅仅是使用已创建的 Promise 实例对象。本质上Promise是一个函数返回的对象，我们可以在它上面绑定回调函数，这样我们就不需要在一开始把回调函数作为参数传入这个函数了。
+
+约定
+不同于“老式”的传入回调，在使用 Promise 时，会有以下约定：
+* 在本轮 事件循环 运行完成之前，回调函数是不会被调用的。
+* 即使异步操作已经完成（成功或失败），在这之后通过 then() 添加的回调函数也会被调用。
+* 通过多次调用 then() 可以添加多个回调函数，它们会按照插入顺序执行。
+Promise 很棒的一点就是链式调用（chaining）。
+
+链式调用
+连续执行两个或者多个异步操作是一个常见的需求，在上一个操作执行成功之后，开始下一个的操作，并带着上一步操作所返回的结果。我们可以通过创造一个 Promise 链来实现这种需求。
+const promise = doSomething();
+const promise2 = promise.then(successCallback, failureCallback);
+Or
+const promise2 = doSomething().then(successCallback, failureCallback);
+
+Catch 的后续链式操作:
+有可能会在一个回调失败之后继续使用链式操作，即 使用一个 catch，这对于在链式操作中抛出一个失败之后，再次进行新的操作很有用。
+
+错误传递:
+通常，一遇到异常抛出，浏览器就会顺着promise链寻找下一个 onRejected 失败回调函数或者由 .catch() 指定的回调函数。
+async function foo() {
+  try {
+    const result = await doSomething();
+    const newResult = await doSomethingElse(result);
+    const finalResult = await doThirdThing(newResult);
+    console.log(`Got the final result: ${finalResult}`);
+  } catch(error) {
+    failureCallback(error);
+  }
+}
+
+
