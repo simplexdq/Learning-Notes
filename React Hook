@@ -1,0 +1,44 @@
+钩子函数（React Hook）
+实现原理
+Hook 是 React 16.8 的新增特性。它可以让你在不编写 class 的情况下使用 state 以及其他的 React 特性。它可以取代掉 class 生命周期中大多数的功能，把更相关的逻辑放在一起，而非零散在各个生命周期实例方法中。
+https://chrisachard.com/replace-redux-with-react-hooks
+https://zh-hans.reactjs.org/docs/hooks-overview.html
+
+Hook 的含义
+Hook 这个单词的意思是"钩子"。
+React Hooks 的意思是，组件尽量写成纯函数，如果需要外部功能和副作用，就用钩子把外部代码"钩"进来。 React Hooks 就是那些钩子。
+你需要什么功能，就使用什么钩子。React 默认提供了一些常用钩子，你也可以封装自己的钩子。
+所有的钩子都是为函数引入外部功能，所以 React 约定，钩子一律使用use前缀命名，便于识别。你要使用 xxx 功能，钩子就命名为 usexxx。
+下面介绍 React 默认提供的四个最常用的钩子。
+* 		useState()
+* 		useContext()
+* 		useReducer()
+* 		useEffect()
+
+useState()：状态钩子
+useState()用于为函数组件引入状态（state）。纯函数不能有状态，所以把状态放在钩子里面。
+本文前面那个组件类，用户点击按钮，会导致按钮的文字改变，文字取决于用户是否点击，这就是状态。使用useState()重写如下。
+useContext()：共享状态钩子
+如果需要在组件之间共享状态，可以使用useContext()。
+现在有两个组件 Navbar 和 Messages，我们希望它们之间共享状态。
+useReducer()：action 钩子
+React 本身不提供状态管理功能，通常需要使用外部库。这方面最常用的库是 Redux。
+Redux 的核心概念是，组件发出 action 与状态管理器通信。状态管理器收到 action 以后，使用 Reducer 函数算出新的状态，Reducer 函数的形式是(state, action) => newState。
+useReducers()钩子用来引入 Reducer 功能。
+const [state, dispatch] = useReducer(reducer, initialState);
+上面是useReducer()的基本用法，它接受 Reducer 函数和状态的初始值作为参数，返回一个数组。数组的第一个成员是状态的当前值，第二个成员是发送 action 的dispatch函数。
+**由于 Hooks 可以提供共享状态和 Reducer 函数，所以它在这些方面可以取代 Redux。但是，它没法提供中间件（middleware）和时间旅行（time travel），如果你需要这两个功能，还是要用 Redux。
+useEffect()：副作用钩子
+useEffect()用来引入具有副作用的操作，最常见的就是向服务器请求数据。以前，放在componentDidMount里面的代码，现在可以放在useEffect()。
+useEffect()的用法如下。
+useEffect(()  =>  {
+  // Async Action
+}, [dependencies])
+上面用法中，useEffect()接受两个参数。第一个参数是一个函数，异步操作的代码放在里面。第二个参数是一个数组，用于给出 Effect 的依赖项，只要这个数组发生变化，useEffect()就会执行。第二个参数可以省略，这时每次组件渲染时，就会执行useEffect()。
+
+
+
+
+
+
+
