@@ -1,0 +1,136 @@
+Promise:
+https://www.cnblogs.com/lvdabao/p/es6-promise-1.html
+为了实现异步操作，是一个构造函数。接受两个参数，resolve和reject。
+应用promise时一般是包装在一个函数里，有需要的时候去运行这个函数。因为在包装好的函数里，会return promise对象。所以执行这个包装好的函数，就会return一个promise对象。
+因promise继承了自身原型函数里的then，catch方法，所以包装好的函数就可以直接调用then，catch方法。
+当包装好的函数去调用then的时候，then接受一个函数作为参数，这个函数就可以拿调用包装好函数里的promise里面，resolve传的数据。
+
+链式操作的用法：
+function anyFunc1() {
+    var p = new Promise(function(resolve, reject) {
+    setTimeout(function() {
+        console.log('function1');
+        resolve('call function1');
+    },2000);
+})
+    return p;
+}
+anyFunc2,anyFunc3 声明方式与anyFunc1一样，只修改数字，略
+
+anyFunc1().
+then(function(data) {
+    console.log(data);
+    return anyFunc2();
+//    return 'nothing'; //如果只有这一行，那么在返回call function1之后返回nothing，并且没有2秒延时；如果在return angFunc2之后还有这一行，则会被忽略；如果没有return，则会在1和3之间返回一个undefined。
+}).
+then(function(data) {
+    console.log(data);
+    return anyFunc3();
+}).
+then(function(data) {
+    console.log(data);
+
+});
+
+Reject:
+//getNumber()创建方式略
+getNumber()
+.then(
+    function(data) {
+        console.log('success');
+        console.log(data);
+    },
+    function(reason，data) {
+        console.log('rejected');
+        console.log(reason);
+    }
+);
+resolve和reject的调用方式总结为：
+anyFunc().then(function(object): Object onFullfilled, function(object): Object onRejected);
+getNumber()函数内部写promise的时候，实现了一个操作为，异步获取一个数字，2秒后执行完成，如果小于5，成功->resolve,如果大于5，则rejec。
+then方法可以接受两个参数，第一个对应的是resolve的回调，第二个是reject的回调。
+
+Catch的用法：
+catch方法的作用与then里的第二个参数一样。
+getNumber()
+.then(function(data){
+    console.log('resolved');
+    console.log(data);
+})
+.catch(function(reason){
+    console.log('rejected');
+    console.log(reason);
+});
+catch还有另一个作用，如果执行resolve的回调时抛出异常，那么不会报错卡死js，而是会进到catch方法中。在resolve的回调中，我们console.log(somedata);而somedata这个变量是没有被定义的。如果我们不用Promise，代码运行到这里就直接在控制台报错了，不往下运行了。也就是说进到catch方法里面去了，而且把错误原因传到了reason参数中。即便是有错误的代码也不会报错了，这与我们的try/catch语句有相同的功能。
+
+all的用法：
+Promise.all([anyFunc1(),anyFunc2(),anyFunc3()]).
+then(function(results) {
+    console.log(results);
+})
+promise的all方法提供了并行执行异步操作的能力，并且在所有异步操作执行完成后才执行回调。
+promise.all来执行，all接收一个数组参数，里面的值最终都返回promis对象。这样，三个异步操作的并行执行的,等到它们都执行完才会进到then里面。三个异步操作返回的数据都在then里，all会把所有的操作结果放进一个数组里传给then，就是results。有了all，你就可以并行执行多个异步操作，并且在一个回调中处理所有的返回数据，是不是很酷？有一个场景是很适合用这个的，一些游戏类的素材比较多的应用，打开网页时，预先加载需要用到的各种资源如图片、flash以及各种静态文件。所有的都加载完后，我们再进行页面的初始化。
+
+Trace的用法：
+all方法的效果实际上是「谁跑的慢，以谁为准执行回调」，那么相对的就有另一个方法「谁跑的快，以谁为准执行回调」，这就是race方法，这个词本来就是赛跑的意思。race的用法与all一样。
+Promise
+.race([runAsync1(), runAsync2(), runAsync3()])
+.then(function(results){
+    console.log(results);
+});
+在then里面的回调开始执行时，runAsync2()和runAsync3()并没有停止，仍旧再执行。于是再过1秒后，输出了他们结束的标志。
+应用场景：
+//请求某个图片资源
+function requestImg(){
+    var p = new Promise(function(resolve, reject){
+        var img = new Image();
+        img.onload = function(){
+            resolve(img);
+        }
+        img.src = 'xxxxxx';
+    });
+    return p;
+}
+
+//延时函数，用于给请求计时
+function timeout(){
+    var p = new Promise(function(resolve, reject){
+        setTimeout(function(){
+            reject('图片请求超时');
+        }, 5000);
+    });
+    return p;
+}
+
+Promise
+.race([requestImg(), timeout()])
+.then(function(results){
+    console.log(results);
+})
+.catch(function(reason){
+    console.log(reason);
+});
+requestImg函数会异步请求一张图片，我把地址写为"xxxxxx"，所以肯定是无法成功请求到的。timeout函数是一个延时5秒的异步操作。我们把这两个返回Promise对象的函数放进race，于是他俩就会赛跑，如果5秒之内图片请求成功了，那么遍进入then方法，执行正常的流程。如果5秒钟图片还未成功返回，那么timeout就跑赢了，则进入catch，报出“图片请求超时”的信息。
+
+allSettled的用法：
+与Promise.all一样，参数是一组包含Promise实例的数组，返回值是一个新的Promise实例，其实例在调用then方法中的回调函数的参数仍是一个数组。不同之处在于无论参数实例resolve还是reject，Promise.allSettled都会执行then方法的第一个回调函数（意思就是不会catch到参数实例的reject状态），其回调函数的参数返回的数组的每一项是一个包含status和value或者reason的一组对象。status代表对应的参数实例状态值，取值只有fulfilled（resolve状态）和rejected（reject状态），当status的值为rejected，对应的另一个对象属性就是reason了，也就是被reject的原因，而成功返回的status的值则是fulfilled，对应的另一个对象属性便是value，对应的值就是resolve的任意值。
+
+Promise.allSettled([anyFunc1,anyFunc2,anyFunc3]).
+then(function(args) {
+    console.log(args);
+})
+在Promise.allSettled出现以前，对于需要发送一组ajax请求都是使用Promise.all去处理，待所有参数实例都resolve则可以继续执行下一步操作，但这样会有个弊端，若是有一个参数实例reject，则直接会进入到catch里面，即使其它实例参数resolve也是如此，Promise.all方法resolve的条件在于参数数组中的所有Promise实例都需要resolve才可以，这样显然在一些业务中不适用的，假如一个模块需要显示三部分内容，每一部分内容都有一个返回Promise实例的接口，如果使用Promise.all需要三个接口都成功返回数据才可以，如果有一个接口挂掉了，则另外两个接口返回的数据不能被获取到，因为此时已经进入到了catch方法，无法在成功回调的函数里面操作数据，渲染界面等。此时Promise.allSettled便派上用场了。无论参数实例是否reject，最终Promise.allSettled内部都会resolve，只不过会添加一个状态status来记录对应的参数实例是否执行成功。我们可以依据这个状态去过滤掉rejected的数据，只操作fulfilled的数据，就会得到我们想要的业务逻辑了。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
