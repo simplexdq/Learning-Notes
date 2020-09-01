@@ -1,0 +1,42 @@
+装箱和拆箱：
+JS中有个应用类型，叫基本包装类型：String，Number，Boolean。
+装箱和拆箱是将基本数据类型和引用类型之间转换的操作。
+
+装箱
+将基本数据类型转换为引用类型的操作。分为隐式装箱和显式装箱。
+
+隐式装箱：
+var s1 = 'call';
+var s2 = s1.substring(2);
+console.log(s2);
+以上代码执行步骤：
+1. 创建一个String类型的实例；
+2. 在实例中调用制定的方法；
+3. 销毁这个实例。
+以上步骤转换为代码：
+var s1 = new String(‘call’)；
+var s2 = s1.substring(2);
+s1 = null;
+由上看出当读取一个基本类型值时，后台创建一个该类型的基本包装类型对象。在这个基本类型的对象上调用方法，其实就是在这个基本包装类型对象上调用方法。这个基本类型的对象时临时的，只存在于方法调用的那一行代码执行的瞬间，执行方法后立即被销毁。所以在基本类型上添加属性和方法不会识别或报错。如下：
+var s1 = 'call_me_R';
+s1.job = 'frontend engineer';
+s1.sayHello = function(){
+	console.log('hello kitty');
+}
+console.log(s1.job); // undefined，此时基本类型已经没有对象了
+s1.sayHello(); // Uncaught TypeError: s1.sayHello is not a function
+
+显示装箱：
+通过基本包装类型对象对基本类型进行显示装箱。
+var name= new String(‘call’);
+显示装箱可以对new出来的对象进行属性和方法的添加。因为通过new操作符创建的引用类型的实例，在执行离开当前作用域之前一直保留在内存中。
+var objStr = new String('call_me_R');
+objStr.job = 'frontend engineer';
+objStr.sayHi = function(){
+	console.log('hello kitty');
+}
+console.log(objStr.job); // frontend engineer
+objStr.sayHi(); // hello kitty
+
+拆箱
+和装箱相反，拆箱是把引用类型转换成基本的数据类型。通常通过引用类型的valueOf()和toString()实现。（见隐式转换）
