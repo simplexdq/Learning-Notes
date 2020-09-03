@@ -1,0 +1,58 @@
+CSS：
+
+1.  元素隐藏：
+display:设置一个元素如何显示，none（不显示）;
+visibility: 指定一个元素可见还是隐藏，hidden（隐藏）;
+隐藏元素时，如果是display:none，元素不仅被隐藏，而且不会再占用空间。
+如果是visibility: hidden，虽然元素被隐藏，但仍占用与未隐藏之前一样的空间。
+opacity:div元素的透明度级别，0（完全透明）
+
+2.  盒模型 content-box和border-box：
+* 标准盒模型content-box：
+它的最大特点是，当已经设定了width和height值的时候，padding和border不被包含在你定义的width和height之内，也就是说，你定义的width只负责content区域的宽度，如果想得到整个盒子宽度，需要再加上padding和border的厚度。 这个content-box就是标准模型，诞生最早。content-box顾名思义，就是内容盒子。 任何浏览器默认使用的都是标准模型。
+* border-box（ie盒子模型）：
+当遵循ie盒子模型时，不管你如何设置padding和border（小于width/2），它只在盒子里面伸缩，不影响整体的宽高，这个border-box是不是在某些时候非常好用？但也不能盲目地用，因为它会影响content，如果padding和border太大，会把内容挤掉的。
+box-sizing:content-box;在宽度和高度之外绘制元素的内边距和边框。
+box-sizing:border-box;通过从已设定的宽度和高度分别减去边框和内边距才能得到内容的宽度和高度.
+
+3.  CSS动画，transition和animation，哪一个性能更好 transition： 强调过渡； 需要触发一个事件，比如鼠标移上去、焦点、点击，才会随着时间改变css属性。
+只有一组（两个：开始-结束）关键帧
+animation：多个关键帧，实现自由动画； 不需要触发任何事件也可随时间变化达到一种动画效果； 与transition不同是animation可以通过@keyframe控制当前帧属性，更灵活。
+
+4.  css怎样实现一个扇形：
+.sector1 {
+            border-radius:100px 0 0;
+            width: 100px;
+            height: 100px;
+            background: #00f;
+        }
+
+        .sector2 {
+            border: 100px solid transparent;
+            width: 0;
+            border-radius: 100px;
+            border-top-color: #f00;
+        }
+css画三角形，梯形，扇形，箭头，椭圆
+https://juejin.im/post/6844904062593269768
+
+5.  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
